@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from . import widgets as w
+from .constants import Menus as m
 
 class SnortRuleForm(ttk.Frame):
     """View for inputting options for Snort Rules"""
@@ -39,33 +40,20 @@ class SnortRuleForm(ttk.Frame):
         # Rule Header info
         h_info = self._add_frame("Header Info", cols=9)
         
-        # Line 1
+        ####################################### Line 1 #####################################
+        
         # Action
         tk.Label(h_info, text="Action").grid(row=0, column=0, sticky=(tk.E + tk.W))
-        action_options = [
-            "alert",
-            "block",
-            "drop",
-            "log",
-            "pass"
-        ]
         #rule_action = tk.StringVar()
         self._vars["Action"] = tk.StringVar()
-        self._vars["Action"].set("alert")
-        action_menu = ttk.OptionMenu(h_info, self._vars["Action"], "alert", *action_options)
+        action_menu = ttk.OptionMenu(h_info, self._vars["Action"], "alert", *m.action_options)
         action_menu.grid(row=1, column=0, sticky=(tk.E + tk.W))
         
         # Protocol
         tk.Label(h_info, text="Protocol").grid(row=0, column=1, sticky=(tk.E + tk.W))
-        protocol_options = [
-            "tcp",
-            "udp",
-            "icmp"
-        ]
         #rule_prot = tk.StringVar()
         self._vars["Protocol"] = tk.StringVar()
-        self._vars["Protocol"].set("tcp")
-        prot_menu = ttk.OptionMenu(h_info, self._vars["Protocol"], "tcp", *protocol_options)
+        prot_menu = ttk.OptionMenu(h_info, self._vars["Protocol"], "tcp", *m.protocol_options)
         prot_menu.grid(row=1, column=1, sticky=(tk.E + tk.W))
         
         # Source IP
@@ -86,14 +74,8 @@ class SnortRuleForm(ttk.Frame):
         
         # Direction
         tk.Label(h_info, text="Direction").grid(row=0, column=4, sticky=(tk.E + tk.W))
-        direction_options = [
-            "->",
-            "<>"
-        ]
-        #rule_dir = tk.StringVar()
         self._vars["Direction"] = tk.StringVar()
-        self._vars["Direction"].set("->")
-        dir_menu = ttk.OptionMenu(h_info, self._vars["Direction"], "->", *direction_options)
+        dir_menu = ttk.OptionMenu(h_info, self._vars["Direction"], "->", *m.direction_options)
         dir_menu.grid(row=1, column=4, sticky=(tk.E + tk.W))
         
         # Destination IP
@@ -126,7 +108,7 @@ class SnortRuleForm(ttk.Frame):
         revnum_entry = ttk.Entry(h_info, textvariable=self._vars["Revision Number"])
         revnum_entry.grid(row=1, column=8, sticky=(tk.E + tk.W))
         
-        # Line 2
+        ########################################## Line 2 ####################################
         # Message
         tk.Label(h_info, text="Message").grid(row=2, column=0, columnspan=7, sticky=(tk.W))
         #rule_message = tk.StringVar()
@@ -143,16 +125,9 @@ class SnortRuleForm(ttk.Frame):
         
         # Priority
         tk.Label(h_info, text="Priority").grid(row=2, column=8, sticky=(tk.E + tk.W))
-        priority_options = [
-            "5",
-            "4",
-            "3",
-            "2",
-            "1"
-        ]
         #rule_priority = tk.StringVar()
         self._vars["Priority"] = tk.StringVar()
-        priority_menu = ttk.OptionMenu(h_info, self._vars["Priority"], "5", *priority_options)
+        priority_menu = ttk.OptionMenu(h_info, self._vars["Priority"], "5", *m.priority_options)
         priority_menu.grid(row=3, column=8, sticky=(tk.E + tk.W))
         
         r_info = self._add_frame("Rule", cols=1)
