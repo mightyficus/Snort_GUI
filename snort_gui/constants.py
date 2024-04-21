@@ -18,6 +18,14 @@ class Menus:
             "<>"
         ]
     
+    priority_options = [
+        "5",
+        "4",
+        "3",
+        "2",
+        "1"
+    ]
+    
     class_types = [
         "unknown",
         "not-suspicious",
@@ -66,6 +74,17 @@ class Menus:
         "409", "410", "411", "412", "413", "415", "416", "417",
         "500", "501", "502", "503", "504", "505"
     ]
+    
+    http_request_methods = [
+        "GET",
+        "POST",
+        "HEAD",
+        "TRACE",
+        "PUT",
+        "DELETE",
+        "CONNECT"
+    ]
+    
     
     flow = [
         "to_server",
