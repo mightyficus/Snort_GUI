@@ -93,7 +93,7 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
 
     def __init__(self, *args, focus_update_var=None, twin_var=None, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
         if twin_var:
             self.twin_var = twin_var
             self.twin_var.trace_add('write', self._remove_value)
@@ -133,9 +133,9 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
     
     def _focusout_validate(self, **kwargs):
         valid = True
-        if not self.get():
-            valid = False
-            self.error.set('A value is required')
+        # if not self.get():
+        #     valid = False
+        #     self.error.set('A value is required')
         return valid
     
 class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
@@ -182,6 +182,10 @@ class ValidatedSpinbox(ValidatedMixin, ttk.Spinbox):
         value = self.get()
         min_val = self.cget('from')
         max_val = self.cget('to')
+
+        if value == '':
+            self.error.set('Value is required')
+            return False
 
         try:
             d_value = Decimal(value)
@@ -244,6 +248,9 @@ class LabelInput(tk.Frame):
         if disable_var:
             self.disable_var = disable_var
             self.disable_var.trace_add('write', self._check_disable)
+
+        self.error = getattr(self.input, 'error', tk.StringVar())
+        ttk.Label(self, textvariable=self.error, **label_args).grid(row=2, column=0, sticky=(tk.W + tk.E))
 
     def _check_disable(self, *_):
         if not hasattr(self, 'disable_var'):

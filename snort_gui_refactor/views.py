@@ -45,6 +45,8 @@ class SnortRuleHeaderForm(ttk.Frame):
         }
         self._vars['Protocol'].trace_add('write', self._prot_callback)
 
+        # TODO: Add a trace with a callback that modifies the rule variable
+
         ##################################### Important Info ##############################
         m_info = self._add_frame("Main Information", cols=9)
 
@@ -64,6 +66,7 @@ class SnortRuleHeaderForm(ttk.Frame):
 
         w.LabelInput(
             m_info, "Source IP",
+            input_class=w.RequiredEntry,
             var=self._vars['Source IP']
         ).grid(row=0, column=2)
 
@@ -82,6 +85,7 @@ class SnortRuleHeaderForm(ttk.Frame):
 
         w.LabelInput(
             m_info, "Destination IP",
+            input_class=w.RequiredEntry,
             var=self._vars['Destination IP']
         ).grid(row=0, column=5)
 
