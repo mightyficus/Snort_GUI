@@ -15,29 +15,80 @@ class SnortRuleForm(ttk.Frame):
             frame.columnconfigure(i, weight=1)
         return frame
     
+    # def http_callback(self, varname, index, event):
+    #     if varname == "HTTP Request":
+    #         if self._body_vars["HTTP Request"].get() != "":
+    #             self._body_vars["HTTP Response"].set("")
+    #     if varname == "HTTP Response":
+    #         if self._body_vars["HTTP Response"].get() != "":
+    #             self._body_vars["HTTP Request"].set("")
+    
     def _protocol_tcp(self, parent):
         # Set up header options: Action Protocol SrcIP SrcPort -> DestIP DestPort
         header_part = f'{self._vars["Action"].get()} {self._vars["Protocol"].get()} {self._vars["Source IP"].get()} {self._vars["Source Port"].get()} {self._vars["Direction"].get()} {self._vars["Destination IP"].get()} {self._vars["Destination Port"].get()}'
         # TODO: HTTP Request, HTTP Response, Flags, Flow
-        
+
+        body_part = "("
+        if self._body_vars["Message"].get() != "":
+            body_part = body_part + f'\n\tmsg:"{self._body_vars["Message"].get()}";'
+        if self._body_vars["Class Type"].get() != "":
+            body_part = body_part + f'\n\tclasstype:{self._body_vars["Class Type"].get()};'
+
         # HTTP Request Method
         tk.Label(parent, text="HTTP Request Method").grid(row=0, column=0, sticky=(tk.W))
         response_menu = ttk.OptionMenu(parent, self._body_vars["HTTP Request"], self._body_vars["HTTP Request"].get(), *m.http_request_methods)
-        response_menu.grid(row=0, column=1)
+        response_menu.grid(row=0, column=1, sticky=(tk.W + tk.E))
         
-        tk.Label(parent, text="HTTP Response").grid(row=1, column=0, sticky=(tk.W))
+        # HTTP Response Code
+        # Currently list of response codes is small, because a long list freaks out on small screens.
+        # This could probably be fixed with an enhanced OptionMenu that has a scrollbar, but this will be 
+        # fine for now.
+        # Because of how the view refreshes, entry boxes don't work well.
+        tk.Label(parent, text="HTTP Response Code").grid(row=1, column=0, sticky=(tk.W))
         response_menu = ttk.OptionMenu(parent, self._body_vars["HTTP Response"], self._body_vars["HTTP Response"].get(), *m.http_codes)
-        response_menu.grid(row=1, column=1)
+        #response_entry = ttk.Entry(parent, textvariable=self._body_vars["HTTP Response"])
+        response_menu.grid(row=1, column=1, sticky=(tk.W + tk.E))
+
+        if self._body_vars["HTTP Request"].get() != "":
+            #self._body_vars["HTTP Response"].trace_remove("write", self._body_vars["HTTP Response"].trace_info()[0][1])
+            #self._body_vars["HTTP Response"].set("")
+            #self._body_vars["HTTP Response"].trace_add("write", self._prot_change)
+            body_part = body_part + f'\n\thttp_method; content:"{self._body_vars["HTTP Request"].get()}";'
+        if self._body_vars["HTTP Response"].get() != "":
+            #self._body_vars["HTTP Request"].trace_remove("write", self._body_vars["HTTP Request"].trace_info()[0][1])
+            #self._body_vars["HTTP Request"].set("")
+            #self._body_vars["HTTP Request"].trace_add("write", self._prot_change)
+            body_part = body_part + f'\n\thttp_stat_code; content:"{self._body_vars["HTTP Response"].get()}";'
+            
         
-        tk.Label(parent, text="Flags").grid(row=2, column=0, sticky=(tk.W))
+        # HTTP Flags
+        # Can't figure this out at the moment, mostly because because the logic to turn it in the 
+        # rule is going to be funky
+        # tk.Label(parent, text="Flags").grid(row=2, column=0, sticky=(tk.W))
+        # tk.Label(parent, text="").grid(row=3, column=0, sticky=(tk.W))
+        # flag_frame = tk.Frame(parent)
+        # for col in range(3):
+        #     flag_frame.columnconfigure(col, weight=1)
         
-        tk.Label(parent, text="").grid(row=3, column=0, sticky=(tk.W))
         
+        
+        #HTTP flow
         tk.Label(parent, text="Flow").grid(row=4, column=0, sticky=(tk.W))
         flow_menu = ttk.OptionMenu(parent, self._body_vars["TCP Flow"], self._body_vars["TCP Flow"].get(), *m.flow)
-        
-        # Set up all body options in format key:value
-        body_part = f'(\n\tmsg:"{self._body_vars["Message"].get()}";\n\tclasstype:{self._body_vars["Class Type"].get()};\n\tpriority:{self._body_vars["Priority"].get()};\n\tsid:{self._body_vars["SID"].get()};\n\trev:{self._body_vars["Revision Number"].get()};\n)'
+        flow_menu.grid(row=4, column=1, sticky=(tk.W + tk.E))
+        if self._body_vars["TCP Flow"].get() != "":
+            body_part = body_part + f'\n\tflow:"{self._body_vars["TCP Flow"].get()}";'
+
+        if self._body_vars["Priority"].get() != "":
+            body_part = body_part + f'\n\tpriority:{self._body_vars["Priority"].get()};'
+        if self._body_vars["SID"].get() != "":
+            body_part = body_part + f'\n\tsid:{self._body_vars["SID"].get()};'
+        if self._body_vars["GID"].get() != "":
+            body_part = body_part + f'\n\tgid:{self._body_vars["GID"].get()};'
+        if self._body_vars["Revision Number"].get() != "":
+            body_part = body_part + f'\n\trev:{self._body_vars["Revision Number"].get()};'
+
+        body_part = body_part + "\n)"
         # Concatenate header and body
         self._vars["Rule"].set(f'{header_part}{body_part}')
         
@@ -45,9 +96,32 @@ class SnortRuleForm(ttk.Frame):
         # Set up header options: Action Protocol SrcIP SrcPort -> DestIP DestPort
         header_part = f'{self._vars["Action"].get()} {self._vars["Protocol"].get()} {self._vars["Source IP"].get()} {self._vars["Source Port"].get()} {self._vars["Direction"].get()} {self._vars["Destination IP"].get()} {self._vars["Destination Port"].get()}'
         # TODO: Flow
+        body_part = "("
+        if self._body_vars["Message"].get() != "":
+            body_part = body_part + f'\n\tmsg:"{self._body_vars["Message"].get()}";'
+        if self._body_vars["Class Type"].get() != "":
+            body_part = body_part + f'\n\tclasstype:{self._body_vars["Class Type"].get()};'
+        
+        #Traffic flow
+        tk.Label(parent, text="").grid(row=0, column=0, sticky=(tk.W))
+        tk.Label(parent, text="").grid(row=1, column=0, sticky=(tk.W))
+        tk.Label(parent, text="Flow").grid(row=2, column=0, sticky=(tk.W))
+        flow_menu = ttk.OptionMenu(parent, self._body_vars["UDP Flow"], self._body_vars["UDP Flow"].get(), *m.flow)
+        flow_menu.grid(row=2, column=1, sticky=(tk.W + tk.E))
+        if self._body_vars["UDP Flow"].get() != "":
+            body_part = body_part + f'\n\tflow:"{self._body_vars["UDP Flow"].get()}";'
         
         # Set up all body options in format key:value
-        body_part = f'(\n\tmsg:"{self._body_vars["Message"].get()}";\n\tclasstype:{self._body_vars["Class Type"].get()};\n\tpriority:{self._body_vars["Priority"].get()};\n\tsid:{self._body_vars["SID"].get()};\n\trev:{self._body_vars["Revision Number"].get()};\n)'
+        if self._body_vars["Priority"].get() != "":
+            body_part = body_part + f'\n\tpriority:{self._body_vars["Priority"].get()};'
+        if self._body_vars["SID"].get() != "":
+            body_part = body_part + f'\n\tsid:{self._body_vars["SID"].get()};'
+        if self._body_vars["GID"].get() != "":
+            body_part = body_part + f'\n\tgid:{self._body_vars["GID"].get()};'
+        if self._body_vars["Revision Number"].get() != "":
+            body_part = body_part + f'\n\trev:{self._body_vars["Revision Number"].get()};'
+
+        body_part = body_part + "\n)"
         # Concatenate header and body
         self._vars["Rule"].set(f'{header_part}{body_part}')
     
@@ -55,9 +129,38 @@ class SnortRuleForm(ttk.Frame):
         # Set up header options: Action Protocol SrcIP -> DestIP
         header_part = f'{self._vars["Action"].get()} {self._vars["Protocol"].get()} {self._vars["Source IP"].get()} {self._vars["Direction"].get()} {self._vars["Destination IP"].get()}\n'
         # TODO: Type, Code
+        body_part = "("
+        if self._body_vars["Message"].get() != "":
+            body_part = body_part + f'\n\tmsg:"{self._body_vars["Message"].get()}";'
+        if self._body_vars["Class Type"].get() != "":
+            body_part = body_part + f'\n\tclasstype:{self._body_vars["Class Type"].get()};'
+
+        tk.Label(parent, text="").grid(row=0, column=0, sticky=(tk.W))
+        tk.Label(parent, text="").grid(row=1, column=0, sticky=(tk.W))
+
+        tk.Label(parent, text="ICMP Type").grid(row=2, column=0, sticky=(tk.W))
+        icmp_type_entry = ttk.Entry(parent, textvariable=self._body_vars["ICMP Type"])
+        icmp_type_entry.grid(row=2, column=1, sticky=(tk.W))
+        if self._body_vars["ICMP Type"].get() != "":
+            body_part = body_part + f'\n\titype:{self._body_vars["ICMP Type"].get()};'
         
+        tk.Label(parent, text="ICMP Flow").grid(row=3, column=0, sticky=(tk.W))
+        icmp_code_entry = ttk.Entry(parent, textvariable=self._body_vars["ICMP Code"])
+        icmp_code_entry.grid(row=3, column=1, sticky=(tk.W))
+        if self._body_vars["ICMP Code"].get() != "":
+            body_part = body_part + f'\n\ticode:{self._body_vars["ICMP Code"].get()};'
+
         # Set up all body options in format key:value
-        body_part = f'(\n\tmsg:"{self._body_vars["Message"].get()}";\n\tclasstype:{self._body_vars["Class Type"].get()};\n\tpriority:{self._body_vars["Priority"].get()};\n\tsid:{self._body_vars["SID"].get()};\n\trev:{self._body_vars["Revision Number"].get()};\n)'
+        if self._body_vars["Priority"].get() != "":
+            body_part = body_part + f'\n\tpriority:{self._body_vars["Priority"].get()};'
+        if self._body_vars["SID"].get() != "":
+            body_part = body_part + f'\n\tsid:{self._body_vars["SID"].get()};'
+        if self._body_vars["GID"].get() != "":
+            body_part = body_part + f'\n\tgid:{self._body_vars["GID"].get()};'
+        if self._body_vars["Revision Number"].get() != "":
+            body_part = body_part + f'\n\trev:{self._body_vars["Revision Number"].get()};'
+
+        body_part = body_part + "\n)"
         # Concatenate header and body
         self._vars["Rule"].set(f'{header_part}{body_part}')
     
@@ -77,7 +180,7 @@ class SnortRuleForm(ttk.Frame):
             
         prot_body.grid(row=1, column=2, columnspan=2, rowspan=5, sticky=(tk.N + tk.S + tk.E + tk.W))
             
-        self.rule_box._set_content()
+        #self.rule_box._set_content()
         
     
     
@@ -203,19 +306,24 @@ class SnortRuleForm(ttk.Frame):
         # Make sure that there is a second function that *only* updates the rule box
         
         # Set default values for each protocol
-        self._body_vars["HTTP Request"] = tk.StringVar()
-        self._body_vars["HTTP Request"].set("GET")
-        self._body_vars["HTTP Response"] = tk.StringVar()
-        self._body_vars["HTTP Response"].set("200")
+        self._body_vars["HTTP Request"] = tk.StringVar(name="HTTP Request")
+        self._body_vars["HTTP Request"].set("")
+        #self._body_vars["HTTP Request"].trace_add("write", callback=self.http_callback)
+        self._body_vars["HTTP Response"] = tk.StringVar(name="HTTP Response")
+        self._body_vars["HTTP Response"].set("")
+        #self._body_vars["HTTP Response"].trace_add("write", callback=self.http_callback)
         self._body_vars["Flags"] = tk.StringVar()
         self._body_vars["Flags"].set("")
         self._body_vars["TCP Flow"] = tk.StringVar()
-        self._body_vars["TCP Flow"].set("from_server")
+        self._body_vars["TCP Flow"].set("")
         self._body_vars["UDP Flow"] = tk.StringVar()
-        self._body_vars["UDP Flow"].set("from_server")
+        self._body_vars["UDP Flow"].set("")
         self._body_vars["ICMP Type"] = tk.StringVar()
         self._body_vars["ICMP Code"] = tk.StringVar()
         
+        for key, value in self._body_vars.items():
+            traceid = value.trace_add("write", self._prot_change)
+            print(traceid)
         
         ############################################### Rule Frame #####################################
         
@@ -230,12 +338,7 @@ class SnortRuleForm(ttk.Frame):
         # anything anytime variables in the first column change
         self._prot_change()
         
-        for key, value in self._body_vars.items():
-            value.trace("w", self._prot_change)
         
         
-        
-        
-        
-        
+
         
