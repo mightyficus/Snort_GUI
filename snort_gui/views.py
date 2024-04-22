@@ -254,7 +254,7 @@ class SnortRuleForm(ttk.Frame):
             value.trace("w", self._prot_change)
         
         ############################################### Body Frame #####################################
-        self.b_info = self._add_frame(self._vars["Protocol"].get().upper(), cols=4)
+        self.b_info = self._add_frame("Body Info", cols=4)
         
         # Message
         tk.Label(self.b_info, text="Message").grid(row=0, column=0, sticky=(tk.W))
