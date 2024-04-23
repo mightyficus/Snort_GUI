@@ -24,6 +24,28 @@ class SnortRuleHeaderForm(ttk.Frame):
             self._vars['Source Port'].set('any')
             self._vars['Destination Port'].set('any')
 
+    def _update_rule(self, *_):
+        rule_header = f"{self._vars['Action'].get()} {self._vars['Protocol'].get()} {self._vars['Source IP'].get()} {self._vars['Source Port'].get()} {self._vars['Direction'].get()} {self._vars['Destination IP'].get()} {self._vars['Destination Port'].get()}"
+        rule_body = ' ('
+        # print(self._vars['Message'].get())
+        if len(self._vars['Message'].get()) != 0:
+            rule_body = rule_body + f"\n\tmsg:\"{self._vars['Message'].get()}\";"
+
+
+        if len(self._vars['Class Type'].get()) != 0:
+            rule_body = rule_body + f"\n\tclasstype:{self._vars['Class Type'].get()};"
+        if self._vars['Priority'] != '':
+            rule_body = rule_body + f"\n\tpriority:{self._vars['Priority'].get()};"
+        if self._vars['SID'] != '':
+            rule_body = rule_body + f"\n\tsid:{self._vars['SID'].get()};"
+        if self._vars['Revision Number'] != '':
+            rule_body = rule_body + f"\n\trev:{self._vars['Revision Number'].get()};\n)"
+
+        rule_body = rule_body
+
+        self._vars['Rule'].set(rule_header + rule_body)
+
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -127,6 +149,10 @@ class SnortRuleHeaderForm(ttk.Frame):
             var=self._vars['Priority'],
             input_args={'from_': 1, 'to': 5, 'increment': 1}
         ).grid(row=1, column=8)
+        self._update_rule()
+        for key, value in self._vars.items():
+            if key != 'Rule':
+                self._vars[key].trace_add('write', self._update_rule)
 
         ################################# Rule Output #####################################
 
