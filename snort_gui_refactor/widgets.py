@@ -107,8 +107,9 @@ class ValidatedCombobox(ValidatedMixin, ttk.Combobox):
             self.focus_update_var.set(value)
 
     def _remove_value(self, *_):
-        self.set('')
-        self.trigger_focusout_validation()
+        if len(self.twin_var.get()) > 0:
+            self.set('')
+            self.trigger_focusout_validation()
 
     def _key_validate(self, proposed, action, **kwargs):
         valid = True
@@ -207,7 +208,7 @@ class LabelInput(tk.Frame):
     def __init__(
             self, parent, label, var, input_class=ttk.Entry,
             input_args=None, label_args=None, position="top", 
-            disable_var=None, *args, **kwargs
+            disable_var=[], *args, **kwargs
     ):
         super().__init__(parent, *args, **kwargs)
 
@@ -221,7 +222,7 @@ class LabelInput(tk.Frame):
             input_args["text"] = label
         else:
             self.label = ttk.Label(self, text=label, **label_args)
-            self.label.grid(row=0, column=0, sticky=(tk.E + tk.W))
+            self.label.grid(row=0, column=0, padx=5, sticky=(tk.E + tk.W))
 
         if input_class in (ttk.Checkbutton, ttk.Button, ttk.Radiobutton, ttk.OptionMenu):
             input_args["variable"] = self.variable
@@ -234,15 +235,15 @@ class LabelInput(tk.Frame):
                 button = ttk.Radiobutton(self, value=v, text=v, **input_args)
                 button.pack(side=tk.LEFT, ipadx=10, ipady=2, expand=True, fill='x')
         if input_class == ttk.OptionMenu:
-            self.input = ttk.OptionMenu(self, self.variable, *input_args['values'])
+            self.input = ttk.OptionMenu(self, self.variable, input_args['values'][0], *input_args['values'])
         else:
             self.input = input_class(self, **input_args)
 
         if position == "top":
-            self.input.grid(row=1, column=0, sticky=(tk.E + tk.W))
+            self.input.grid(row=1, column=0, padx=1, pady=5, sticky=(tk.E + tk.W))
             self.columnconfigure(0, weight=1)
         else:
-            self.input.grid(row=0, column=1, sticky=(tk.E + tk.W))
+            self.input.grid(row=0, column=1, padx=1, sticky=(tk.E + tk.W))
             self.columnconfigure(1, weight=1)
 
         if disable_var:

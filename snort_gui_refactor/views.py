@@ -30,6 +30,38 @@ class SnortRuleHeaderForm(ttk.Frame):
         # print(self._vars['Message'].get())
         if len(self._vars['Message'].get()) != 0:
             rule_body = rule_body + f"\n\tmsg:\"{self._vars['Message'].get()}\";"
+        # Protocol specific options
+        if self._vars['Protocol'].get() == 'tcp':
+            self._vars['tcp_disabled'].set(False)
+            self._vars['flow_disabled'].set(False)
+            self._vars['udp_disabled'].set(True)
+            self._vars['icmp_disabled'].set(True)
+            if len(self._vars['Request Method'].get()) != 0:
+                rule_body = rule_body + f"\n\thttp_method;\n\tcontent:\"{self._vars['Request Method'].get()}\"; /* Request Method */"
+            if len(self._vars['Response Code'].get()) != 0:
+                # print(f'{len(self._vars["Response Code"].get())}: {self._vars["Response Code"].get()}')
+                rule_body = rule_body + f"\n\thttp_stat_code;\n\tcontent:\"{self._vars['Message'].get()}\";/* Response Code */"
+            if len(self._vars['Flow'].get()) != 0:
+                rule_body = rule_body + f"\n\tflow:\"{self._vars['Flow'].get()}\";"
+
+        elif self._vars['Protocol'].get() == 'udp':
+            self._vars['tcp_disabled'].set(True)
+            self._vars['flow_disabled'].set(False)
+            self._vars['udp_disabled'].set(False)
+            self._vars['icmp_disabled'].set(True)
+            if len(self._vars['Flow'].get()) != 0:
+                rule_body = rule_body + f"\n\tflow:\"{self._vars['Flow'].get()}\";"
+
+        elif self._vars['Protocol'].get() == 'icmp':
+            self._vars['tcp_disabled'].set(True)
+            self._vars['flow_disabled'].set(True)
+            self._vars['udp_disabled'].set(True)
+            self._vars['icmp_disabled'].set(False)
+            if len(self._vars['ICMP Type'].get()) != 0:
+                rule_body = rule_body + f"\n\titype:{self._vars['ICMP Type'].get()};"
+            if len(self._vars['ICMP Code'].get()) != 0:
+                rule_body = rule_body + f"\n\ticode:{self._vars['ICMP Code'].get()};"
+
 
 
         if len(self._vars['Class Type'].get()) != 0:
@@ -63,7 +95,17 @@ class SnortRuleHeaderForm(ttk.Frame):
             'Priority': tk.IntVar(value=5),
             'Message': tk.StringVar(),
             'Rule': tk.StringVar(),
-            'port_disabled': tk.BooleanVar(value=False)
+            'Request Method': tk.StringVar(value=""),
+            'Response Code': tk.StringVar(value=""),
+            'Flow': tk.StringVar(),
+            #'Flags': [],
+            'ICMP Type': tk.StringVar(),
+            'ICMP Code': tk.StringVar(),
+            'port_disabled': tk.BooleanVar(value=False),
+            'tcp_disabled': tk.BooleanVar(value=False),
+            'udp_disabled': tk.BooleanVar(value=True),
+            'flow_disabled': tk.BooleanVar(value=False),
+            'icmp_disabled': tk.BooleanVar(value=True)
         }
         self._vars['Protocol'].trace_add('write', self._prot_callback)
 
@@ -76,14 +118,14 @@ class SnortRuleHeaderForm(ttk.Frame):
             m_info, "Action",
             input_class=ttk.OptionMenu,
             var=self._vars['Action'],
-            input_args={'default': 'alert', 'values': c.actions}
+            input_args={'values': c.actions}
         ).grid(row=0, column=0)
 
         w.LabelInput(
             m_info, "Protocol",
             input_class=ttk.OptionMenu,
             var=self._vars['Protocol'],
-            input_args={'default': 'tcp', 'values': c.protocols}
+            input_args={'values': c.protocols}
         ).grid(row=0, column=1)
 
         w.LabelInput(
@@ -102,7 +144,7 @@ class SnortRuleHeaderForm(ttk.Frame):
             m_info, "Direction",
             input_class=ttk.OptionMenu,
             var=self._vars['Direction'],
-            input_args={'default': '->', 'values': ['->', '->', '<>']}
+            input_args={'values': ['->', '<>']}
         ).grid(row=0, column=4)
 
         w.LabelInput(
@@ -149,6 +191,49 @@ class SnortRuleHeaderForm(ttk.Frame):
             var=self._vars['Priority'],
             input_args={'from_': 1, 'to': 5, 'increment': 1}
         ).grid(row=1, column=8)
+
+        ################################# Body Options ####################################
+        b_info = self._add_frame("Body Options", cols=1)
+
+        w.LabelInput(
+            b_info, "Request Method",
+            input_class=w.ValidatedCombobox,
+            var=self._vars['Request Method'],
+            disable_var=self._vars['tcp_disabled'],
+            input_args={'values': c.http_request_methods, 'twin_var': self._vars['Response Code']}
+        ).grid(row=0, column=0)
+
+        w.LabelInput(
+            b_info, "Response Code",
+            input_class=w.ValidatedCombobox,
+            var=self._vars['Response Code'],
+            disable_var=self._vars['tcp_disabled'],
+            input_args={'values': c.http_codes, 'twin_var': self._vars['Request Method']}
+        ).grid(row=1, column=0)
+
+        w.LabelInput(
+            b_info, "Flow",
+            input_class=w.ValidatedCombobox,
+            var=self._vars['Flow'],
+            disable_var=self._vars['flow_disabled'],
+            input_args={'values': c.flow}
+        ).grid(row=2, column=0)
+
+        w.LabelInput(
+            b_info, "ICMP Type",
+            input_class=w.ValidatedCombobox,
+            var=self._vars['ICMP Type'],
+            disable_var=self._vars['icmp_disabled'],
+            input_args={'values': c.icmp_types}
+        ).grid(row=3, column=0)
+
+        w.LabelInput(
+            b_info, "ICMP Code",
+            input_class=w.ValidatedCombobox,
+            var=self._vars['ICMP Code'],
+            disable_var=self._vars['icmp_disabled'],
+            input_args={'values': [str(x) for x in range(17)]}
+        ).grid(row=4, column=0)
         self._update_rule()
         for key, value in self._vars.items():
             if key != 'Rule':
