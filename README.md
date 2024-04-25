@@ -2,9 +2,9 @@
 Snort Rule Builder is a simple graphical interface used to create rules for the Snort application, commonly used as an open-source IDS. In its current state, it has a limited set of capabilities, including creation of rules using the tcp, udp, and icmp protocols. It allows for the creation of a full header, and offers common body options and a limited set of protocol-specific body options. It compiles the supplied input into a rule in an output area.
 
 # Author Information
-Author: Cooper Hopkin
-email: cooper.hopkin@protonmail.com
-github.com/mightyficus
+Author: Cooper Hopkin<br>
+email: cooper.hopkin@protonmail.com <br>
+github.com/mightyficus <br>
 
 # Requirements
 * Python 3
